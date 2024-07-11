@@ -4,7 +4,7 @@ LABEL maintainer="HaLD"
 WORKDIR /usr/src/app
 
 # COPY ./techtrends/requirements.txt ./
-COPY ./techtrends ./
+# COPY ./techtrends ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
