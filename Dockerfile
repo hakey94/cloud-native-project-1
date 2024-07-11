@@ -3,11 +3,11 @@ LABEL maintainer="HaLD"
 
 WORKDIR /usr/src/app
 
-COPY ./project/techtrends/requirements.txt ./
+COPY ./techtrends/requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./project/techtrends ./
+COPY ./techtrends ./
 
 RUN python init_db.py
 
