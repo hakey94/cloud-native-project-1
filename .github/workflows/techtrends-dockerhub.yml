@@ -21,7 +21,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           username: hald94
-          password: dckr_pat_o1_zTAr23mH9cgsED-jbts-8qlg
+          password: 123456aA@
 
       - name: Build and push
         uses: docker/build-push-action@v2
