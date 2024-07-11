@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # RUN docker builder prune --all --force
 
-# COPY ./techtrends ./
+COPY ./techtrends/init_db.py ./
 
 RUN python init_db.py
 
