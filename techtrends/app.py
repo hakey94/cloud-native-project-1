@@ -1,15 +1,18 @@
 import sqlite3
-import datetime
+from datetime import datetime
 import logging
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
 
+db_connection_count = 0
 # Function to get a database connection.
 # This function connects to database with the name `database.db`
 def get_db_connection():
+    global db_connection_count
     connection = sqlite3.connect('database.db')
     connection.row_factory = sqlite3.Row
+    db_connection_count += 1
     return connection
 
 # Function to get a post using its ID
@@ -38,13 +41,16 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
+      messageLogging('id: "{id}" does not exist'.format(id=post_id))
       return render_template('404.html'), 404
     else:
+      messageLogging('connected post: "{post}"'.format(post=post['title']))
       return render_template('post.html', post=post)
 
 # Define the About Us page
 @app.route('/about')
 def about():
+    messageLogging('Connected About page!')
     return render_template('about.html')
 
 # Define the post creation functionality 
@@ -62,36 +68,33 @@ def create():
                          (title, content))
             connection.commit()
             connection.close()
-
+            messageLogging('Create "{title}" successful!'.format(title=title))
             return redirect(url_for('index'))
 
     return render_template('create.html')
 
 @app.route('/healthz')
 def healthcheck():
-    response = app.response_class(
-            response=json.dumps({"result":"OK - healthy"}),
-            status=200,
-            mimetype='application/json'
-    )
-
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    app.logger.info('${timestamp} "GET/"')
-    app.logger.debug('DEBUG message')
-    return response
+    try:
+        connection = get_db_connection()
+        connection.cursor()
+        connection.execute('SELECT * FROM posts')
+        connection.close()
+        return {'result': 'OK - healthy'}
+    except Exception:
+        return {'result': 'Error - Unhealthy'}, 500
 
 @app.route('/metrics')
 def metrics():
-    response = app.response_class(
-            response=json.dumps({"status":"success","code":0,"data":{"db_connection_count":1,"post_count":7}}),
-            status=200,
-            mimetype='application/json'
-    )
-
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    app.logger.info('${timestamp} "GET /metrics HTTP/1.1"')
+    connection = get_db_connection()
+    posts = connection.execute('SELECT * FROM posts').fetchall()
+    connection.close()
+    post_count = len(posts)
+    response = {"db_connection_count": db_connection_count, "post_count": post_count}
     return response
+
+def messageLogging(content):
+    app.logger.info('{time} | {message'.format(time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), message=content))
 
 # start the application on port 3111
 if __name__ == "__main__":
