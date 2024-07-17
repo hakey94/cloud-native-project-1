@@ -70,11 +70,10 @@ def create():
             connection.close()
             messageLogging('Create "{title}" successful!'.format(title=title))
             return redirect(url_for('index'))
-
     return render_template('create.html')
 
 @app.route('/healthz')
-def healthcheck():
+def healthz():
     try:
         connection = get_db_connection()
         connection.cursor()
@@ -94,7 +93,7 @@ def metrics():
     return response
 
 def messageLogging(content):
-    app.logger.info('{time} | {message'.format(time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), message=content))
+    app.logger.info('{time} | {message}'.format(time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), message=content))
 
 # start the application on port 3111
 if __name__ == "__main__":
